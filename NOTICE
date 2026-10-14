@@ -1,0 +1,14 @@
+MicroTurboGeo
+Copyright 2026 Pavan Kumar Karsinapu (modifications and additions)
+
+This product is a modified derivative of ProtoBlade
+  Copyright 2024 Tesseract Software Limited
+  Licensed under the Apache License, Version 2.0
+
+The following files originate from ProtoBlade and have been modified:
+  src/microturbogeo/{blade,cad,geom,machine,stage,cli,__main__}.py
+  tests/test_geom.py and the fixtures under tests/fixtures/
+The following files are new in MicroTurboGeo:
+  src/microturbogeo/{sections,preflight,export}.py, examples/, tests/test_{sections,config,preflight,domain}.py
+
+A summary of the changes is given in docs/CHANGES.md. The full license text is in LICENSE.

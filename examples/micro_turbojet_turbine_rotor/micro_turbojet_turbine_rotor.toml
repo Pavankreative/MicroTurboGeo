@@ -1,0 +1,28 @@
+# Axial turbine rotor, micro-turbojet. Units: metres.
+# Tip speed at 110 krpm and r = 41.2 mm is ~475 m/s. Tip clearance tapers 0.30 mm (LE) -> 0.25 mm (TE).
+[machine]
+name = "Micro-turbojet turbine rotor"
+units = 'metres'
+axis = [ [0.0,0.0,0.0] , [0.0,0.0,1.0] ]
+rpm = 110000.0
+
+[[stage]]
+name = 'stage_1'
+
+[[stage.endwall]]
+type = 'parametric'
+z_inlet = -0.004
+z_outlet = 0.016
+hub_radius = [0.0300, 0.0295]
+shroud_radius = [0.0405, 0.0412]
+n_points = 21
+blend = 'cosine'
+
+[[stage.blade_section]]
+name = 'rotor'
+n_blade = 25
+tip_clearance = 0.00030         # absolute, metres (at the leading edge)
+tip_clearance_te = 0.00025      # optional, at the trailing edge
+tip_clearance_mode = 'absolute'
+ps_section_fname = 'rotor_ps.fpd'
+ss_section_fname = 'rotor_ss.fpd'
