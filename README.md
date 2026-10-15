@@ -26,7 +26,9 @@ passage height.
 11. [Meshing and solver notes](#meshing-and-solver-notes)
 12. [Limitations](#limitations)
 13. [Testing](#testing)
-14. [Attribution and license](#attribution-and-license)
+14. [What I contributed](#what-i-contributed)
+15. [Validation](#validation)
+16. [Attribution and license](#attribution-and-license)
 
 ## Why a micro-scale tool
 
@@ -66,8 +68,8 @@ Outputs are written next to the case file, named `<case>-<stage>-<blade>`:
 | `*_<patch>.step` | One STEP per patch (`--formats patch-step`) |
 | `*_patches.json` | Patch areas and centroids, sector angle, periodic rotation data, OpenFOAM/SU2 snippets |
 
-Build time depends on the case; the three shipped examples took roughly 1 to 4 minutes each on the development
-machine. Run `--check` first, since it catches most input mistakes in well under a second.
+Build time depends on the case; the three shipped examples took about 0.5 to 2 minutes each (28 s, 98 s and 123 s) on a cloud
+container, measured 2026-10-15. Run `--check` first, since it catches most input mistakes in well under a second.
 
 ## Case file reference
 
@@ -228,13 +230,48 @@ verify the geometry, topology and export files (below).
 ## Testing
 
 ```bash
-pytest -m "not slow"     # 33 fast tests, ~30 s
-pytest -m slow           # builds the turbine rotor domain: topology, volume, patches, tip gap, export (~2 min)
+pytest -m "not slow"     # 33 fast tests, a few seconds
+pytest -m slow           # 7 tests that build the turbine rotor domain: topology, volume, patches, tip gap, export (about 1 min)
 ```
 
 The slow tests check that the domain is a single valid solid, that its volume equals the sector volume minus the
 blade, that the sector volume agrees with the annulus geometry, that all eight patches are found, that the
 periodic faces are a rotation of one pitch, and that the tip gap lies within the requested taper.
+
+## What I contributed
+
+MicroTurboGeo is derived from [ProtoBlade](https://github.com/tesseractsoftware) (Tesseract Software Limited, Apache-2.0),
+which supplies the core idea and code for building a periodic fluid sector from blade sections. The files and changes below
+are mine; the complete, file-level record is in [`NOTICE`](NOTICE) and [`docs/CHANGES.md`](docs/CHANGES.md).
+
+| Area | What I added | Where |
+|---|---|---|
+| Tip clearance | Gap modelled in the geometry: constant or LE-to-TE tapered, absolute or % span | `blade.py`, `cad.py` |
+| Endwalls | Parametric hub and shroud (linear or cosine blend) | `stage.py`, `geom.py` |
+| Pre-flight | `--check` report: solidity, pitch/chord, span, hub/tip ratio, clearance as % span and chord, first-cell hint, tip speed | `preflight.py` |
+| CFD export | Named boundary patches, multi-region STL, per-patch STEP, JSON manifest with periodic-rotation data | `export.py` |
+| Sections and examples | Parametric section generator, `.fpd` writer, three micro-turbojet example cases | `sections.py`, `examples/` |
+| Robustness | Tolerances that scale with domain size, vectorised duplicate rejection, `arctan2`, validation of the machine axis, periodic surface extended past both endwalls | `geom.py`, `blade.py` |
+| Tests | Section, config, pre-flight and full-domain tests | `tests/test_{sections,config,preflight,domain}.py` |
+
+Modified from ProtoBlade: `blade`, `cad`, `geom`, `machine`, `stage`, `cli`, `__main__` and `tests/test_geom.py`.
+
+## Validation
+
+**Status: geometry and export are verified; solver workflows are not validated.**
+
+| Level | What it shows | Status |
+|---|---|---|
+| Fast tests | Config parsing, section generation, geometry helpers, pre-flight numbers | 33 passed (2026-10-15) |
+| Slow tests | Single valid solid; volume equals sector volume minus blade; all eight patches found; periodic faces are one pitch apart; tip gap within the requested taper | 7 passed (2026-10-15) |
+| Example builds | All three shipped cases build and export | Passed, 28 s to 123 s |
+| Export check | Turbine-rotor case: eight patches present, equal periodic face areas (2.3445e-4 m^2 each), sector angle 14.4 deg for 25 blades | Passed |
+| Meshing | A mesh generated from the STEP or STL in ANSYS, OpenFOAM or SU2 with a quality report | Planned |
+| Solver run | A periodic single-passage run with the OpenFOAM and SU2 snippets, checking mass-flow conservation across the periodic pair | Planned |
+| Geometry vs reference | Compare a built passage with a published or hand-measured blade row | Planned |
+
+The aerodynamic quality of the example sections is not assessed, and the OpenFOAM and SU2 snippets are unvalidated
+starting points.
 
 ## Attribution and license
 
