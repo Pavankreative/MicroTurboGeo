@@ -240,7 +240,7 @@ periodic faces are a rotation of one pitch, and that the tip gap lies within the
 
 ## What I contributed
 
-MicroTurboGeo is derived from [ProtoBlade](https://github.com/tesseractsoftware) (Tesseract Software Limited, Apache-2.0),
+MicroTurboGeo is derived from ProtoBlade (Tesseract Software Limited, Apache-2.0),
 which supplies the core idea and code for building a periodic fluid sector from blade sections. The files and changes below
 are mine; the complete, file-level record is in [`NOTICE`](NOTICE) and [`docs/CHANGES.md`](docs/CHANGES.md).
 
