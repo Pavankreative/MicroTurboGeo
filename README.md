@@ -46,6 +46,8 @@ passage height.
 Requires Python 3.9+ and CadQuery (OpenCASCADE).
 
 ```bash
+git clone https://github.com/Pavankreative/MicroTurboGeo.git
+cd MicroTurboGeo
 pip install -e .
 ```
 
