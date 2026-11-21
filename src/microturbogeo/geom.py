@@ -73,34 +73,31 @@ def reinterpolate_curve(x: NDArray, y: NDArray, s: NDArray, base: float = 1.5, N
         A tuple of three arrays newly interpolated arrays : x_new,y_new,s_new
 
     """
-    N = x.shape[0]
-    fx = interp1d(s, x)
-    fy = interp1d(s, y)
-
-    del_s = max(s) - min(s)
-
-    start = 0.0 ** (1.0 / base)
-    mid = 0.5 ** (1.0 / base)
-    if N_new == 0:
-        N_new = N
-    s_new = np.zeros(N_new)
-    for i in range(1, N_new + 1):
-        s_new[i - 1] = (start + (i - 1) * (mid - start) / (N_new - 1)) ** base
-
-    s_2 = np.flipud(s_new)
-
-    s_3 = 1 - s_2
-    s_4 = np.delete(s_3, 0)
-
-    s_new = np.concatenate((s_new, s_4)) * del_s
-
-    x_new = np.zeros(len(s_new))
-    y_new = np.zeros(len(s_new))
-    for i in range(len(s_new)):
-        x_new[i] = fx(s_new[i])
-        y_new[i] = fy(s_new[i])
-
-    return x_new, y_new, s_new
+    x, y, s = (np.asarray(a, dtype=float) for a in (x, y, s))
+    if any(a.ndim != 1 for a in (x, y, s)) or not (len(x) == len(y) == len(s)) or len(s) < 2:
+        raise ValueError("x, y and s must be equal-length 1D arrays with at least two points")
+    if not all(np.isfinite(a).all() for a in (x, y, s)):
+        raise ValueError("Curve data must be finite")
+    if not np.isfinite(base) or base <= 1:
+        raise ValueError("Clustering base must exceed 1")
+    if isinstance(N_new, (bool, np.bool_)) or not isinstance(N_new, (int, np.integer)) or N_new == 1 or N_new < 0:
+        raise ValueError("N_new must be 0 or an integer >= 2")
+    count = N_new or len(s)
+    ds = np.diff(s)
+    if np.any(ds < 0):
+        raise ValueError("Curve parameter must be nondecreasing")
+    duplicate = ds == 0
+    if np.any(duplicate & ((np.diff(x) != 0) | (np.diff(y) != 0))):
+        raise ValueError("Repeated parameter has inconsistent coordinates")
+    keep = np.r_[True, ~duplicate]
+    x, y, s = x[keep], y[keep], s[keep]
+    if len(s) < 2:
+        raise ValueError("Curve parameter must span a nonzero interval")
+    half = np.linspace(0., 0.5 ** (1. / base), count) ** base
+    fraction = np.r_[half, (1. - half[::-1])[1:]]
+    s_new = s[0] + fraction * (s[-1] - s[0])
+    s_new[0], s_new[-1] = s[0], s[-1]
+    return np.interp(s_new, s, x), np.interp(s_new, s, y), s_new
 
 
 def calculate_curvature() -> NDArray:

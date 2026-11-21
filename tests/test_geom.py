@@ -26,9 +26,9 @@ def test_reinterpolate_curve(naca0012_files,naca0012_interp):
         np.save('y_interp',y)
         np.save('s_interp',s_new)
     else:
-        np.testing.assert_array_equal(x,naca0012_interp[0])
-        np.testing.assert_array_equal(y,naca0012_interp[1])
-        np.testing.assert_array_equal(s_new,naca0012_interp[2])
+        np.testing.assert_allclose(x,naca0012_interp[0], rtol=1e-13, atol=1e-15)
+        np.testing.assert_allclose(y,naca0012_interp[1], rtol=1e-13, atol=1e-15)
+        np.testing.assert_allclose(s_new,naca0012_interp[2], rtol=1e-13, atol=1e-15)
 
 
 
